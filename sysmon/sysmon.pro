@@ -15,11 +15,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
         sysmonitor.cpp \
     sensores.cpp \
-    data_sensores.cpp
+    data_sensores.cpp \
+    hardware.cpp \
+    jsonmodel.cpp
 
 HEADERS  += sysmonitor.h \
     sensores.h \
-    data_sensores.h
+    data_sensores.h \
+    hardware.h \
+    jsonmodel.h
 
 FORMS    += sysmonitor.ui
 

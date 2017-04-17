@@ -8,11 +8,19 @@ sysmonitor::sysmonitor(QWidget *parent) :
     ui(new Ui::sysmonitor)
 {
     ui->setupUi(this);
-    ui->table_procesos->setColumnCount(5);
     sensors = new data_sensores();
     hilo_sens = new sensores(sensors,this);
     connect(hilo_sens, SIGNAL(refreshInfo(int)), this, SLOT(on_tabWidget_tabBarClicked(int)));
     hilo_sens->start();
+
+    timer = new QTimer();
+    timer->start(5000);
+    connect(timer, SIGNAL(timeout()), SLOT(on_tabWidget_tabBarClicked(int)));
+
+    connect(&hw,SIGNAL(ejecute(int)),this,SLOT(on_tabWidget_tabBarClicked(int)));
+    hw.moveToThread(&hilo_hw);
+    connect(&hilo_hw,SIGNAL(started()),&hw,SLOT(lshw()));
+    hilo_hw.start();
 }
 
 sysmonitor::~sysmonitor()
@@ -35,10 +43,16 @@ void sysmonitor::on_tabWidget_tabBarClicked(int index)
 
         break;
 
-        case 1:
+    case 1:{
+            QByteArray aux = hw.transferenciadatos();
+            QJsonModel * model = new QJsonModel;
+            ui->tree_hw->setColumnWidth(0,100);
+            ui->tree_hw->setModel(model);
+            model->loadJson(aux);
+    }
         break;
 
-        case 2:
+    case 2:{
         QDir directory("/proc");
         ui->table_procesos->setRowCount(0);
 
@@ -50,7 +64,6 @@ void sysmonitor::on_tabWidget_tabBarClicked(int index)
                 QFuture<QVector<QString>> function = QtConcurrent::run(this, &sysmonitor::explore_dir_process, actual_dir, dir);
                 QFutureWatcher<QVector<QString>> *watcher = new QFutureWatcher<QVector<QString>>;
                 watcher->setFuture(function);
-
 
                 connect(watcher, &QFutureWatcher<QVector<QString>>::finished, [this,watcher](){
                     QVector<QString> aux;
@@ -65,7 +78,12 @@ void sysmonitor::on_tabWidget_tabBarClicked(int index)
                 });
             }
         }
+    }
         break;
+
+    default:
+        break;
+
     }
 }
 

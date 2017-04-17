@@ -8,9 +8,11 @@
 #include <QFutureWatcher>
 #include <QTableWidgetItem>
 #include <QtConcurrent/QtConcurrent>
+
 #include "sensores.h"
 #include "data_sensores.h"
-
+#include "hardware.h"
+#include "jsonmodel.h"
 
 namespace Ui {
 class sysmonitor;
@@ -31,6 +33,9 @@ private:
     Ui::sysmonitor *ui;
     data_sensores *sensors;
     sensores *hilo_sens;
+    QThread hilo_hw;
+    hardware hw;
+    QTimer *timer;
     bool is_numeric(const std::string x);
     QVector<QString> explore_dir_process(QString actual_dir, QString dir);
 };
